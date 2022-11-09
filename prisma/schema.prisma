@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(uuid())
+  username    String    @unique
+  password    String
+  email       String?   @unique
+  gender      String?
+  nickname    String?
+  dateOfBirth DateTime? @db.Date
+  language    String?
+  nation      String?
+  avatar      String?
+  urlCode     String?
+  balance     Int?
+  donate      Int?
+  dateJoin    DateTime? @db.Date @default(now())
+  donateTotal Int?
+  Follow      Follow[]
+}
+
+model Follow {
+  user_id     String
+  follower_id String
+  Player      Player @relation(fields: [follower_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_follower_id")
+  User        User   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_id")
+
+  @@id([user_id, follower_id])
+  @@index([follower_id], map: "fk_follower_id")
+}
+
+model Player {
+  id           String    @id
+  fee          Int?
+  name         String?
+  description  String?   @db.Text
+  status       String?
+  follower     String?   @db.VarChar(255)
+  hiredTime    Int?
+  completeRate Float?
+  album        String?   @db.VarChar(255)
+  device       String?   @db.VarChar(255)
+  game         String?   @db.VarChar(255)
+  dateJoin     DateTime? @db.Date
+  Follow       Follow[]
+}

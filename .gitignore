@@ -1,0 +1,8 @@
+node_modules
+.husky
+.idea
+*.env
+coverage
+test-report.html
+log
+build
