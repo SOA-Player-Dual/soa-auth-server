@@ -6,7 +6,7 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
-    "importHelpers": true,
+    "importHelpers": false,
     "jsx": "react",
     "alwaysStrict": true,
     "sourceMap": true,
