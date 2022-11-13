@@ -1,15 +1,19 @@
 {
-  "name": "ts-boilerplate",
+  "name": "auth-server",
   "version": "1.0.0",
-  "description": "Clone's personal boilerplate",
-  "main": "src/index.js",
+  "description": "SOA auth server",
+  "main": "src/index.ts",
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register src/index",
-    "dev": "nodemon -r tsconfig-paths/register src/index.ts",
-    "build": "tsc --build",
-    "clean": "tsc --build --clean",
+    "start": "node build/src/index.js",
+    "dev": " prisma db pull && npm run generate && nodemon -r tsconfig-paths/register src/index.ts",
+    "build": "npm run generate && tsc",
+    "clean": "tsc --clean",
     "test": "jest --passWithNoTests",
-    "prepare": "husky install"
+    "generate": "npx prisma generate",
+    "deploy": "npx prisma migrate deploy"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma"
   },
   "keywords": [
     "typescript",

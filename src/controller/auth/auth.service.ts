@@ -59,11 +59,11 @@ export const register = async (
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       let eMsg: string;
-      switch (e.code) {
+      switch (e?.code) {
         case 'P2002':
-          if (e.meta.target === 'User_username_key') {
+          if (e?.meta?.target === 'User_username_key') {
             eMsg = 'Username already exist';
-          } else if (e.meta.target === 'User_email_key') {
+          } else if (e?.meta?.target === 'User_email_key') {
             eMsg = 'Email already exist';
           }
           break;

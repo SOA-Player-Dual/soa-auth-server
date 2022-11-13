@@ -8,22 +8,25 @@ datasource db {
 }
 
 model User {
-  id          String    @id @default(uuid())
-  username    String    @unique
+  id          String     @id @default(uuid())
+  username    String     @unique
   password    String
-  email       String?   @unique
+  email       String?    @unique
   gender      String?
   nickname    String?
-  dateOfBirth DateTime? @db.Date
+  dateOfBirth DateTime?  @db.Date
   language    String?
   nation      String?
   avatar      String?
   urlCode     String?
   balance     Int?
-  donate      Int?
-  dateJoin    DateTime? @db.Date @default(now())
+  dateJoin    DateTime?  @db.Date
   donateTotal Int?
+  Contract    Contract[]
+  Donate      Donate[]
   Follow      Follow[]
+  OTP         OTP?
+  Rating      Rating[]
 }
 
 model Follow {
@@ -37,17 +40,86 @@ model Follow {
 }
 
 model Player {
-  id           String    @id
+  id           String       @id
   fee          Int?
   name         String?
-  description  String?   @db.Text
+  description  String?      @db.Text
   status       String?
-  follower     String?   @db.VarChar(255)
+  follower     String?      @db.VarChar(255)
   hiredTime    Int?
   completeRate Float?
-  album        String?   @db.VarChar(255)
-  device       String?   @db.VarChar(255)
-  game         String?   @db.VarChar(255)
-  dateJoin     DateTime? @db.Date
+  album        String?      @db.VarChar(255)
+  device       String?      @db.VarChar(255)
+  dateJoin     DateTime?    @db.Date
+  Contract     Contract[]
+  Donate       Donate[]
   Follow       Follow[]
+  PlayerGame   PlayerGame[]
+  Rating       Rating[]
+}
+
+model Contract {
+  id         String   @id
+  user       String
+  player     String
+  time       Int
+  fee        Int
+  created_at DateTime @db.Timestamp(0)
+  Player     Player   @relation(fields: [player], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_player")
+  User       User     @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user")
+
+  @@index([player], map: "fk_player")
+  @@index([user], map: "fk_user")
+}
+
+model Donate {
+  id          String   @id
+  user        String
+  player      String
+  money       Int
+  displayName String   @db.VarChar(255)
+  message     String   @db.VarChar(255)
+  created_at  DateTime @db.Timestamp(0)
+  Player      Player   @relation(fields: [player], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_donate_player")
+  User        User     @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_donate_user")
+
+  @@index([player], map: "fk_donate_player")
+  @@index([user], map: "fk_donate_user")
+}
+
+model OTP {
+  user       String   @id
+  mail       String
+  otp        String   @db.VarChar(6)
+  expired_at DateTime @db.Timestamp(0)
+  User       User     @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_otp_user")
+}
+
+model Rating {
+  player     String
+  user       String
+  comment    String   @db.VarChar(255)
+  rate       Int
+  created_at DateTime @db.Timestamp(0)
+  Player     Player   @relation(fields: [player], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rating_player")
+  User       User     @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rating_user")
+
+  @@id([player, user])
+  @@index([user], map: "fk_rating_user")
+}
+
+model Game {
+  id         String       @id
+  game       String
+  PlayerGame PlayerGame[]
+}
+
+model PlayerGame {
+  player String
+  game   String
+  Game   Game   @relation(fields: [game], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_playergame_game")
+  Player Player @relation(fields: [player], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_playergame_player")
+
+  @@id([player, game])
+  @@index([game], map: "fk_playergame_game")
 }
