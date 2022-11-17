@@ -9,7 +9,7 @@
     "build": "npm run generate && tsc",
     "clean": "tsc --clean",
     "test": "jest --passWithNoTests",
-    "generate": "npx prisma generate",
+    "generate": "prisma generate",
     "deploy": "npx prisma migrate deploy"
   },
   "prisma": {

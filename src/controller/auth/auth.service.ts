@@ -17,7 +17,7 @@ export const login = async (
     if (!user) return next(createError(401, 'Username not exist'));
     if (!compare(_req.body.password, user.password))
       return next(createError(401, 'Wrong password'));
-    return res.json({ msg: 'Login ok', data: {...user, password: ''} });
+    return res.json({ msg: 'Login ok', data: { ...user, password: '' } });
   } catch (e) {
     return next(e);
   }
@@ -50,11 +50,22 @@ export const register = async (
         dateOfBirth: new Date(dateOfBirth),
         language,
         nation,
+        urlCode: nickname,
       },
     });
+    const player = await prisma.player.create({
+      data: {
+        id: user.id,
+        name: user.nickname,
+        description: "Blank description",
+        album: "['_blank']",
+        device: "['_blank']",
+        dateJoin: user.dateJoin,
+      }
+    })
     res.json({
       msg: 'Register success',
-      data: { ...user, password: '' },
+      data: { user: { ...user, password: '' }, player },
     });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -65,6 +76,8 @@ export const register = async (
             eMsg = 'Username already exist';
           } else if (e?.meta?.target === 'User_email_key') {
             eMsg = 'Email already exist';
+          } else if (e?.meta?.target === 'User_urlcode_key') {
+            eMsg = 'URL code already exist';
           }
           break;
       }

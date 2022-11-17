@@ -1,5 +1,5 @@
 # Build image
-FROM node:16.13-alpine as builder
+FROM node:16.13-alpine as auth-server-builder
 WORKDIR /app
 
 COPY package*.json ./
@@ -8,7 +8,7 @@ RUN npm rebuild bcrypt
 
 COPY ./prisma prisma
 COPY ./build build
-COPY ./node_modules/.prisma node_modules/.prisma
+RUN npm run generate
 COPY .env .
 ENV HOST="0.0.0.0"
 EXPOSE 8001
