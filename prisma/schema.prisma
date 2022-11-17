@@ -17,40 +17,42 @@ model User {
   dateOfBirth DateTime?  @db.Date
   language    String?
   nation      String?
-  avatar      String?
-  urlCode     String?
-  balance     Int?
-  dateJoin    DateTime?  @db.Date
-  donateTotal Int?
+  avatar      String?    @default("")
+  urlCode     String?    @unique(map: "User_urlcode_key")
+  balance     Int?       @default(0)
+  dateJoin    DateTime   @default(now())
+  donateTotal Int?       @default(0)
   Contract    Contract[]
   Donate      Donate[]
   Follow      Follow[]
   OTP         OTP?
+  Player      Player?
   Rating      Rating[]
 }
 
 model Follow {
-  user_id     String
-  follower_id String
-  Player      Player @relation(fields: [follower_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_follower_id")
-  User        User   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_id")
+  player_id String
+  user_id   String
+  Player    Player @relation(fields: [player_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_follow_player_id")
+  User      User   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_follow_user_id")
 
-  @@id([user_id, follower_id])
-  @@index([follower_id], map: "fk_follower_id")
+  @@id([player_id, user_id])
+  @@index([user_id], map: "fk_follow_user_id")
 }
 
 model Player {
   id           String       @id
-  fee          Int?
-  name         String?
-  description  String?      @db.Text
-  status       String?
-  follower     String?      @db.VarChar(255)
-  hiredTime    Int?
-  completeRate Float?
-  album        String?      @db.VarChar(255)
-  device       String?      @db.VarChar(255)
-  dateJoin     DateTime?    @db.Date
+  fee          Int          @default(0)
+  name         String
+  description  String       @db.VarChar(255)
+  status       String       @default("0")
+  follower     Int          @default(0)
+  hiredTime    Int          @default(0)
+  completeRate Float        @default(0)
+  album        String       @db.VarChar(3000)
+  device       String       @db.VarChar(255)
+  dateJoin     DateTime     @db.Date
+  User         User         @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_player_id")
   Contract     Contract[]
   Donate       Donate[]
   Follow       Follow[]
@@ -59,14 +61,15 @@ model Player {
 }
 
 model Contract {
-  id         String   @id
+  id         String          @id
   user       String
   player     String
   time       Int
   fee        Int
-  created_at DateTime @db.Timestamp(0)
-  Player     Player   @relation(fields: [player], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_player")
-  User       User     @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user")
+  status     Contract_status
+  created_at DateTime        @db.Timestamp(0)
+  Player     Player          @relation(fields: [player], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_player")
+  User       User            @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user")
 
   @@index([player], map: "fk_player")
   @@index([user], map: "fk_user")
@@ -90,7 +93,7 @@ model Donate {
 model OTP {
   user       String   @id
   mail       String
-  otp        String   @db.VarChar(6)
+  otp        String   @unique(map: "otp_otp_key") @db.VarChar(6)
   expired_at DateTime @db.Timestamp(0)
   User       User     @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_otp_user")
 }
@@ -111,6 +114,7 @@ model Rating {
 model Game {
   id         String       @id
   game       String
+  gameImg    String
   PlayerGame PlayerGame[]
 }
 
@@ -122,4 +126,63 @@ model PlayerGame {
 
   @@id([player, game])
   @@index([game], map: "fk_playergame_game")
+}
+
+model failed_jobs {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  uuid       String   @unique(map: "failed_jobs_uuid_unique") @db.VarChar(255)
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model password_resets {
+  email      String    @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+
+  @@index([email], map: "password_resets_email_index")
+  @@ignore
+}
+
+model personal_access_tokens {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  tokenable_type String    @db.VarChar(255)
+  tokenable_id   BigInt    @db.UnsignedBigInt
+  name           String    @db.VarChar(255)
+  token          String    @unique(map: "personal_access_tokens_token_unique") @db.VarChar(64)
+  abilities      String?   @db.Text
+  last_used_at   DateTime? @db.Timestamp(0)
+  expires_at     DateTime? @db.Timestamp(0)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+
+  @@index([tokenable_type, tokenable_id], map: "personal_access_tokens_tokenable_type_tokenable_id_index")
+}
+
+model users {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name              String    @db.VarChar(255)
+  email             String    @unique(map: "users_email_unique") @db.VarChar(255)
+  email_verified_at DateTime? @db.Timestamp(0)
+  password          String    @db.VarChar(255)
+  remember_token    String?   @db.VarChar(100)
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+}
+
+enum Contract_status {
+  Pending
+  Processing
+  Completed
+  Canceled
 }
