@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node build/src/index.js",
     "dev": " prisma db pull && npm run generate && nodemon -r tsconfig-paths/register src/index.ts",
-    "build": "npm run generate && tsc",
+    "build": "prisma db pull && npm run generate && tsc",
     "clean": "tsc --clean",
     "test": "jest --passWithNoTests",
     "generate": "prisma generate",

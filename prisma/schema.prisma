@@ -21,12 +21,13 @@ model User {
   urlCode     String?    @unique(map: "User_urlcode_key")
   balance     Int?       @default(0)
   dateJoin    DateTime   @default(now())
-  donateTotal Int?       @default(0)
+  donateTotal Int        @default(0)
   Contract    Contract[]
   Donate      Donate[]
   Follow      Follow[]
   OTP         OTP?
   Player      Player?
+  Post        Post[]
   Rating      Rating[]
 }
 
@@ -52,6 +53,8 @@ model Player {
   album        String       @db.VarChar(3000)
   device       String       @db.VarChar(255)
   dateJoin     DateTime     @db.Date
+  avgRate      Float        @default(0)
+  totalRate    Float        @default(0)
   User         User         @relation(fields: [id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_player_id")
   Contract     Contract[]
   Donate       Donate[]
@@ -101,11 +104,12 @@ model OTP {
 model Rating {
   player     String
   user       String
-  comment    String   @db.VarChar(255)
+  comment    String    @db.VarChar(255)
   rate       Int
-  created_at DateTime @db.Timestamp(0)
-  Player     Player   @relation(fields: [player], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rating_player")
-  User       User     @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rating_user")
+  created_at DateTime  @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  Player     Player    @relation(fields: [player], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rating_player")
+  User       User      @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rating_user")
 
   @@id([player, user])
   @@index([user], map: "fk_rating_user")
@@ -178,6 +182,18 @@ model users {
   remember_token    String?   @db.VarChar(100)
   created_at        DateTime? @db.Timestamp(0)
   updated_at        DateTime? @db.Timestamp(0)
+}
+
+model Post {
+  id         String    @id
+  user       String
+  content    String    @db.VarChar(255)
+  media      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  User       User      @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_post_user")
+
+  @@index([user], map: "fk_post_user")
 }
 
 enum Contract_status {

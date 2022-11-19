@@ -4,6 +4,7 @@ const router = Router();
 
 router.route('/login').post(login);
 router.route('/register').post(register)
+router.route('/password').post()
 router.route('/google').get().post()
 
 router.route('/').get((_req: Request, res: Response) => {

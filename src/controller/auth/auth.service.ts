@@ -57,12 +57,12 @@ export const register = async (
       data: {
         id: user.id,
         name: user.nickname,
-        description: "Blank description",
-        album: "['_blank']",
-        device: "['_blank']",
+        description: 'Blank description',
+        album: '',
+        device: '',
         dateJoin: user.dateJoin,
-      }
-    })
+      },
+    });
     res.json({
       msg: 'Register success',
       data: { user: { ...user, password: '' }, player },
@@ -84,5 +84,33 @@ export const register = async (
       return next(createError(400, eMsg));
     }
     next(e);
+  }
+};
+
+export const changePassword = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id, password, newpassword } = _req.body;
+    const user = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!compare(password, user.password))
+      return next(createError(401, 'Wrong password'));
+    await prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        password: hash(newpassword),
+      },
+    });
+    return res.json({ msg: 'Change password success' });
+  } catch (e) {
+    return next(e);
   }
 };
